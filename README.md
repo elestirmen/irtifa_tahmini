@@ -745,27 +745,13 @@ pip install pillow piexif rasterio pyproj numpy pandas tqdm tensorflow exifread 
 
 #### Method 3: Using requirements.txt
 
-Create a `requirements.txt` file:
-
-```txt
-pillow>=9.0.0
-piexif>=1.1.3
-rasterio>=1.3.0
-pyproj>=3.4.0
-numpy>=1.21.0
-pandas>=1.3.0
-tqdm>=4.62.0
-tensorflow>=2.8.0
-exifread>=3.0.0
-matplotlib>=3.5.0
-scikit-learn>=1.0.0
-```
-
-Then install:
+Install Python packages from the provided `requirements.txt`:
 
 ```bash
 pip install -r requirements.txt
 ```
+
+Note: GDAL/PROJ system dependencies may still be required for `rasterio`/`pyproj` (see above).
 
 #### Verification
 
@@ -967,47 +953,34 @@ python egitim_sureci_dosyadan_okuma_o1.py \
 
 ```
 irtifa_tahmini/
-│
-├── README.md                                    # This file
-├── LICENSE                                      # License file
-├── run_pipeline.ps1                            # End-to-end pipeline script (PowerShell)
-│
-├── Core Scripts
-│   ├── egitim_sureci_dosyadan_okuma_o1.py     # Main training script
-│   ├── model_zoo.py                            # Model architecture definitions
-│   ├── fonksiyonlar.py                         # Utility functions
-│   ├── exif_data_generator.py                  # Custom data generator for EXIF-based training
-│   └── modeli_test_etme_koordinatlara gore irtifa verisi alarak_toplu_model_o1.py  # Evaluation script
-│
-├── Data Preparation
-│   └── veri_hazirlama_etiketleme/
-│       ├── veri_hazirlama_goruntu_cogaltma_negatif_zoom_ve_rotate_parallel_program_o1.py
-│       │   # Image augmentation and DEM-assisted labeling
-│       ├── goruntuleri_csv_dosyasina_cevir_o1.py
-│       │   # Generate CSV from labeled images
-│       └── csv_file.csv                        # Training CSV file (generated)
-│
-├── Model Implementations
-│   └── models/
-│       ├── resnet_small.py                     # ResNet18/34 implementations
-│       └── advanced_backbones.py               # Vision Transformer and advanced CNN backbones
-│
-├── Data Directories
-│   ├── input_images/                           # Raw input images
-│   ├── output_images_irtifa_full/              # Augmented and labeled images
-│   ├── modeller/                               # Trained models (.h5 files)
-│   ├── test_sehir/                             # Urban test images
-│   ├── test_arazi/                             # Rural test images
-│   └── model_plots/                            # Evaluation visualization plots
-│
-├── DEM Files
-│   ├── ana_harita_urgup_30_cm_utm_elevation.tif    # Ürgüp region DEM
-│   └── karlik_30_cm_bingmap_utm_elevation.tif      # Karlık region DEM
-│
-└── Results
-    ├── results.txt                             # Evaluation results
-    ├── results_sehir.txt                       # Urban test results
-    └── results_arazi.txt                       # Rural test results
+|-- README.md
+|-- README_EXIF.md
+|-- LICENSE
+|-- requirements.txt
+|-- run_pipeline.ps1
+|-- egitim_sureci_dosyadan_okuma_o1.py
+|-- model_zoo.py
+|-- fonksiyonlar.py
+|-- exif_data_generator.py
+|-- modeli_test_etme_koordinatlara gore irtifa verisi alarak_toplu_model_o1.py
+|-- veri_hazirlama_etiketleme/
+|   |-- veri_hazirlama_goruntu_cogaltma_negatif_zoom_ve_rotate_parallel_program_o1.py
+|   |-- goruntuleri_csv_dosyasina_cevir_o1.py
+|   `-- csv_file.csv
+|-- models/
+|   |-- resnet_small.py
+|   `-- advanced_backbones.py
+|-- input_images/
+|-- output_images_irtifa_full/
+|-- modeller/
+|-- test_sehir/
+|-- test_arazi/
+|-- model_plots/
+|-- results.txt
+|-- results_sehir.txt
+|-- results_arazi.txt
+|-- ana_harita_urgup_30_cm_utm_elevation.tif
+`-- karlik_30_cm_bingmap_utm_elevation.tif
 ```
 
 ### Key Files Description
