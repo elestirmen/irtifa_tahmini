@@ -1223,10 +1223,10 @@ This project is licensed under the MIT License. See LICENSE file for details.
 If you use this code, methodology, or results in your research, please cite:
 
 ```bibtex
-@software{altitude_estimation_2024,
+@software{altitude_estimation_2025,
   title = {Deep Learning-Based Altitude Estimation from Aerial Images Using DEM-Assisted Labeling},
   author = {Ahmet Ertugrul Arik},
-  year = {2024},
+  year = {2025},
   url = {https://github.com/elestirmen/irtifa_tahmini},
   note = {Academic Research Project},
   version = {1.0}
