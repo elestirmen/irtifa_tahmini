@@ -1,4 +1,4 @@
-# Deep Learning-Based Altitude Estimation from Aerial Images Using DEM-Assisted Labeling
+# 🛩️ Deep Learning-Based Altitude Estimation from Aerial Images Using DEM-Assisted Labeling
 
 <div align="center">
 
@@ -7,12 +7,14 @@
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.x-orange.svg)](https://www.tensorflow.org/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS-lightgrey.svg)](#prerequisites)
+[![Models](https://img.shields.io/badge/Models-30%2B%20Architectures-purple.svg)](#model-architectures)
 
 </div>
 
 ---
 
-## Abstract
+## 📋 Abstract
 
 This research presents a comprehensive deep learning framework for estimating flight altitude from aerial images captured by drones or satellites. The proposed methodology addresses a fundamental challenge in remote sensing and autonomous navigation: determining the relative height above ground from single-view aerial imagery. Unlike traditional GPS-based methods that provide absolute elevation above sea level, our approach leverages Digital Elevation Model (DEM) data to automatically generate accurate ground-truth labels by computing the relative flight altitude as the difference between GPS altitude and terrain elevation at the image capture location.
 
@@ -24,7 +26,50 @@ The framework provides a complete end-to-end pipeline from raw image preprocessi
 
 ---
 
-## Table of Contents
+## 🔄 Pipeline Overview
+
+```mermaid
+flowchart LR
+    A["📷 Raw Aerial\nImages"] --> B["🔍 EXIF\nExtraction"]
+    B --> C["🗺️ DEM Query\n& Labeling"]
+    C --> D["🔄 Data\nAugmentation"]
+    D --> E["📊 CSV\nGeneration"]
+    E --> F["🧠 Model\nTraining"]
+    F --> G["📈 Evaluation\n& Metrics"]
+
+    style A fill:#4A90D9,color:#fff
+    style B fill:#7B68EE,color:#fff
+    style C fill:#2E8B57,color:#fff
+    style D fill:#FF8C00,color:#fff
+    style E fill:#DC143C,color:#fff
+    style F fill:#8B008B,color:#fff
+    style G fill:#008B8B,color:#fff
+```
+
+```mermaid
+flowchart TB
+    subgraph labeling ["📌 Automated Labeling"]
+        L1["GPS Altitude (MSL)"] --> L3["flight_altitude_AGL =\nGPS_Alt - DEM_Elev"]
+        L2["DEM Elevation (MSL)"] --> L3
+    end
+
+    subgraph augmentation ["🔄 Augmentation"]
+        A1["Rotation (12×30°)"]
+        A2["Negative Zoom"]
+        A3["Center Crop & Resize"]
+    end
+
+    subgraph models ["🧠 30+ Architectures"]
+        M1["CNNs: ResNet, EfficientNet,\nMobileNet, DenseNet, VGG,\nConvNeXt, Custom CNN"]
+        M2["ViTs: ViT, PVT, PVTv2,\nEfficientFormer, EfficientViT"]
+    end
+
+    labeling --> augmentation --> models
+```
+
+---
+
+## 📑 Table of Contents
 
 - [Introduction](#introduction)
   - [Problem Statement](#problem-statement)
@@ -55,6 +100,10 @@ The framework provides a complete end-to-end pipeline from raw image preprocessi
   - [Quick Start](#quick-start)
   - [Manual Workflow](#manual-workflow)
   - [Advanced Configuration](#advanced-configuration)
+- [Utility Tools](#utility-tools)
+  - [Altitude-Based Image Filtering (SRTM)](#altitude-based-image-filtering-srtm)
+  - [Altitude-Range Image Filter (EXIF)](#altitude-range-image-filter-exif)
+  - [NPZ Data Merge](#npz-data-merge)
 - [Project Structure](#project-structure)
 - [Technical Details](#technical-details)
   - [DEM Processing](#dem-processing)
@@ -68,7 +117,7 @@ The framework provides a complete end-to-end pipeline from raw image preprocessi
 
 ---
 
-## Introduction
+## 📖 Introduction
 
 ### Problem Statement
 
@@ -116,7 +165,7 @@ This work extends previous research by combining DEM-assisted labeling with deep
 
 ---
 
-## Methodology
+## 🔬 Methodology
 
 ### Data Labeling Strategy
 
@@ -412,14 +461,14 @@ Two data loading strategies are supported:
 
 - **EarlyStopping**: Stop training if no improvement
   - Monitor: `val_loss`
-  - Patience: 5-10 epochs
+  - Patience: 10 epochs
   - Restore best weights: `True`
 
 - **ReduceLROnPlateau**: Reduce learning rate on plateau
   - Monitor: `val_loss`
   - Factor: 0.5
-  - Patience: 3 epochs
-  - Min learning rate: $1 \times 10^{-7}$
+  - Patience: 5 epochs
+  - Min learning rate: $\max(lr \times 10^{-3},\; 1 \times 10^{-7})$
 
 - **CSVLogger**: Log training metrics to CSV file
   - Filename: `training_log_{timestamp}.csv`
@@ -437,7 +486,7 @@ During training and evaluation, the following metrics are computed:
 
 ---
 
-## Experimental Setup
+## 🧪 Experimental Setup
 
 ### Dataset
 
@@ -585,7 +634,7 @@ Two independent test sets are used for evaluation:
 
 ---
 
-## Results and Evaluation
+## 📊 Results and Evaluation
 
 ### Model Performance
 
@@ -678,7 +727,7 @@ The evaluation pipeline generates comprehensive visualizations for each model:
 
 ---
 
-## Installation and Usage
+## 🚀 Installation and Usage
 
 ### Prerequisites
 
@@ -949,38 +998,118 @@ python egitim_sureci_dosyadan_okuma_o1.py \
 
 ---
 
-## Project Structure
+## 🛠️ Utility Tools
+
+In addition to the main pipeline, the repository includes standalone utility scripts for data management and filtering.
+
+### Altitude-Based Image Filtering (SRTM)
+
+**Script**: `irtifa_etiketleme.py`
+
+Filters aerial images by computing flight altitude using the **NASA SRTM** elevation data via the [OpenTopography API](https://portal.opentopography.org/). Unlike the main pipeline (which uses local high-resolution DEM files), this tool fetches elevation data online, making it useful when local DEM files are unavailable.
+
+**Features**:
+- Extracts GPS coordinates and altitude from image EXIF metadata
+- Queries SRTM Global 30m DEM via REST API
+- Computes relative flight altitude (AGL = GPS altitude − terrain elevation)
+- Copies images within a specified altitude range to a target folder
+- Recursive folder scanning (supports nested subdirectories)
+
+**Usage**:
+```python
+# Edit source_folder and target_folder in the script, then run:
+python irtifa_etiketleme.py
+```
+
+> **Note**: Requires an internet connection for SRTM data retrieval. The altitude range filter is configurable within the script (default: 480–650 m AGL).
+
+---
+
+### Altitude-Range Image Filter (EXIF)
+
+**Script**: `belirli_irtifa_Araliginde_goruntuleri_ayikla.py`
+
+A simpler filtering tool that selects images based on their **raw GPS altitude** (MSL) from EXIF metadata—without DEM correction. Useful for quick pre-filtering before the full pipeline.
+
+**Features**:
+- Reads GPS altitude directly from EXIF data
+- Handles rational/tuple altitude format from different camera models
+- Copies matching images to a target folder
+- No internet or DEM data required
+
+**Usage**:
+```python
+# Edit source_folder, target_folder, and altitude range in the script, then run:
+python belirli_irtifa_Araliginde_goruntuleri_ayikla.py
+```
+
+---
+
+### NPZ Data Merge
+
+**Script**: `npz_merge.py`
+
+Merges multiple `.npz` data files (containing pre-processed image arrays and labels) into a single file, or compresses large `.npy` files into `.npz` format for storage efficiency.
+
+**Usage**:
+```python
+# Edit file_names list in the script, then run:
+python npz_merge.py
+```
+
+---
+
+## 📁 Project Structure
 
 ```
 irtifa_tahmini/
-|-- README.md
-|-- README_EXIF.md
-|-- LICENSE
-|-- requirements.txt
-|-- run_pipeline.ps1
-|-- egitim_sureci_dosyadan_okuma_o1.py
-|-- model_zoo.py
-|-- fonksiyonlar.py
-|-- exif_data_generator.py
-|-- modeli_test_etme_koordinatlara gore irtifa verisi alarak_toplu_model_o1.py
-|-- veri_hazirlama_etiketleme/
-|   |-- veri_hazirlama_goruntu_cogaltma_negatif_zoom_ve_rotate_parallel_program_o1.py
-|   |-- goruntuleri_csv_dosyasina_cevir_o1.py
-|   `-- csv_file.csv
-|-- models/
-|   |-- resnet_small.py
-|   `-- advanced_backbones.py
-|-- input_images/
-|-- output_images_irtifa_full/
-|-- modeller/
-|-- test_sehir/
-|-- test_arazi/
-|-- model_plots/
-|-- results.txt
-|-- results_sehir.txt
-|-- results_arazi.txt
-|-- ana_harita_urgup_30_cm_utm_elevation.tif
-`-- karlik_30_cm_bingmap_utm_elevation.tif
+├── README.md                          # Project documentation (this file)
+├── README_EXIF.md                     # EXIF metadata reference
+├── LICENSE                            # MIT License
+├── requirements.txt                   # Python dependencies
+├── run_pipeline.ps1                   # End-to-end pipeline script (PowerShell)
+│
+├── egitim_sureci_dosyadan_okuma_o1.py # 🧠 Main training script (CLI)
+├── model_zoo.py                       # 🏗️  Model architecture factory (30+ models)
+├── fonksiyonlar.py                    # 📐 Utility functions (coordinates, rotation, distance)
+├── exif_data_generator.py             # 📂 Keras Sequence generator (EXIF labels on-the-fly)
+├── modeli_test_etme_koordinatlara gore irtifa verisi alarak_toplu_model_o1.py
+│                                      # 📈 Batch model evaluation script
+│
+├── irtifa_etiketleme.py               # 🌍 SRTM-based altitude labeling & filtering
+├── belirli_irtifa_Araliginde_goruntuleri_ayikla.py
+│                                      # ✂️  EXIF altitude-range image filter
+├── goruntu_cogaltma_dondurme.py        # 🔄 Standalone rotation augmentation
+├── npz_merge.py                       # 📦 NPZ/NPY data merge utility
+│
+├── egitim_sureci_dosyadan_okuma_heterojen_dagilimli.py
+│                                      # ⚖️  Training with heterogeneous sample weighting
+├── egitim_sureci_dosyadan_okuma_ozgun_otokodlayici.py
+│                                      # 🔬 Experimental: custom autoencoder training
+│
+├── models/                            # Custom backbone implementations
+│   ├── __init__.py
+│   ├── resnet_small.py                #   ResNet-18/34 builders
+│   └── advanced_backbones.py          #   ViT, PVT, PVTv2, EfficientFormer, EfficientViT, SqueezeNet
+│
+├── veri_hazirlama_etiketleme/         # Data preparation & labeling sub-module
+│   ├── veri_hazirlama_goruntu_cogaltma_negatif_zoom_ve_rotate_parallel_program_o1.py
+│   │                                  #   Parallel augmentation + DEM labeling
+│   ├── goruntuleri_csv_dosyasina_cevir_o1.py
+│   │                                  #   Image → CSV label generator
+│   ├── csv_file.csv                   #   Generated training labels
+│   └── ...                            #   Additional experimental variants
+│
+├── input_images/                      # Raw aerial images (user-provided)
+├── output_images_irtifa_full/         # Augmented & labeled training images
+├── modeller/                          # Saved trained models (.h5)
+├── test_sehir/                        # Urban test set
+├── test_arazi/                        # Rural test set
+├── model_plots/                       # Evaluation visualization plots
+├── results*.txt                       # Evaluation result files
+│
+├── ana_harita_urgup_30_cm_utm_elevation.tif   # DEM: Ürgüp region
+└── karlik_30_cm_bingmap_utm_elevation.tif     # DEM: Karlık region
 ```
 
 ### Key Files Description
@@ -1022,7 +1151,7 @@ Data preparation script that:
 
 ---
 
-## Technical Details
+## ⚙️ Technical Details
 
 ### DEM Processing
 
@@ -1103,7 +1232,7 @@ Two loading strategies are implemented:
 
 ---
 
-## Limitations and Future Work
+## ⚠️ Limitations and Future Work
 
 ### Current Limitations
 
@@ -1181,7 +1310,7 @@ Two loading strategies are implemented:
 
 ---
 
-## Contributing
+## 🤝 Contributing
 
 This is an academic research project. Contributions, suggestions, and bug reports are welcome and appreciated.
 
@@ -1210,7 +1339,7 @@ This is an academic research project. Contributions, suggestions, and bug report
 
 ---
 
-## License
+## 📄 License
 
 This project is licensed under the MIT License. See LICENSE file for details.
 
@@ -1218,7 +1347,7 @@ This project is licensed under the MIT License. See LICENSE file for details.
 
 ---
 
-## Citation
+## 📝 Citation
 
 If you use this code, methodology, or results in your research, please cite:
 
@@ -1239,7 +1368,7 @@ If you publish a paper, add its BibTeX entry here.
 
 ---
 
-## Acknowledgments
+## 🙏 Acknowledgments
 
 We gratefully acknowledge:
 
@@ -1264,6 +1393,6 @@ We gratefully acknowledge:
 
 **For questions, collaboration inquiries, or research discussions, please contact the research team.**
 
-**Last Updated**: 2025-12-13
+**Last Updated**: 2026-02-20
 
 </div>
